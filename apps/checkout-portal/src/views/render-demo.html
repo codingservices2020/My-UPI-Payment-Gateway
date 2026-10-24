@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YOUPI PG | Demo Checkout</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: #f3f6fb;
+      color: #14213d;
+    }
+    .header {
+      background: #101d36;
+      color: white;
+      padding: 20px 8%;
+      font-size: 22px;
+      font-weight: 800;
+    }
+    .container {
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    .notice {
+      background: #fff3cd;
+      color: #664d03;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      font-weight: 600;
+    }
+    .checkout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .panel {
+      background: white;
+      padding: 28px;
+      border-radius: 18px;
+      box-shadow: 0 8px 30px #15234110;
+    }
+    .amount {
+      font-size: 40px;
+      font-weight: 800;
+      margin: 18px 0;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      margin: 12px 0;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .success { background: #147d49; color: white; }
+    .failed { background: #d64545; color: white; }
+    .cancelled { background: #e9edf3; color: #24324a; }
+    .result {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 10px;
+      background: #f2f5fa;
+      font-weight: 600;
+    }
+    a { color: #2563eb; }
+    @media (max-width: 650px) {
+      .checkout { grid-template-columns: 1fr; }
+      .container { margin: 15px auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">YOUPI PG — Demo Checkout</header>
+
+  <main class="container">
+    <div class="notice">
+      SIMULATION ONLY — No real UPI payment, QR code,
+      bank transfer, or settlement will occur.
+    </div>
+
+    <div class="checkout">
+      <section class="panel">
+        <h2>Order Summary</h2>
+        <p>Demo Wallet Coin Package</p>
+        <div class="amount">₹100.00</div>
+        <p>Merchant: YOUPI Demo Store</p>
+        <p>Mode: Test Transaction</p>
+        <p>No payment details are required.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Simulate Payment</h2>
+        <p>Select a test outcome:</p>
+
+        <button class="success" onclick="simulate('success')">
+          Simulate Successful Payment
+        </button>
+
+        <button class="failed" onclick="simulate('failed')">
+          Simulate Failed Payment
+        </button>
+
+        <button class="cancelled" onclick="simulate('cancelled')">
+          Simulate Cancelled Payment
+        </button>
+
+        <div id="result" class="result" role="status" aria-live="polite">
+          Waiting for simulation...
+        </div>
+      </section>
+    </div>
+
+    <p><a href="/">← Back to Demo Store</a></p>
+  </main>
+
+  <script>
+    function simulate(outcome) {
+      const messages = {
+        success: 'SUCCESS — Simulated payment completed.',
+        failed: 'FAILED — Simulated payment was declined.',
+        cancelled: 'CANCELLED — Simulated payment was cancelled.'
+      };
+
+      document.getElementById('result').textContent =
+        messages[outcome] || 'Unknown simulation result';
+    }
+  </script>
+</body>
+</html>

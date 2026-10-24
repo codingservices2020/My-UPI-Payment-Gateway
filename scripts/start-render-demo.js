@@ -187,7 +187,46 @@ if (
 
     return;
 }
-    // Payment functionality is deliberately disabled
+    
+
+    // Simulation-only checkout page
+    if (
+        pathname === '/checkout/demo' &&
+        (method === 'GET' || method === 'HEAD')
+    ) {
+        try {
+            const checkoutPath = path.resolve(
+                __dirname,
+                '../apps/checkout-portal/src/views/render-demo.html'
+            );
+
+            const html = fs.readFileSync(checkoutPath, 'utf8');
+
+            res.writeHead(200, {
+                'Content-Type': 'text/html; charset=utf-8',
+                'Cache-Control': 'no-store',
+                'X-Content-Type-Options': 'nosniff',
+                'Content-Security-Policy':
+                    "default-src 'none'; " +
+                    "style-src 'unsafe-inline'; " +
+                    "script-src 'unsafe-inline'; " +
+                    "base-uri 'none'; " +
+                    "form-action 'none'; " +
+                    "frame-ancestors 'none'"
+            });
+
+            res.end(method === 'HEAD' ? undefined : html);
+        } catch (error) {
+            console.error('Demo checkout error:', error);
+            res.writeHead(500);
+            res.end('Unable to load demo checkout.');
+        }
+
+        return;
+    }
+
+
+// Payment functionality is deliberately disabled
     res.writeHead(404, {
         'Content-Type': 'application/json',
         'Cache-Control': 'no-store'
