@@ -295,51 +295,28 @@
     }
   }
 
-  async function triggerCheckout(packName, coins, price) {
+  
+function triggerCheckout(packName, coins, price) {
+    const amount = Number(price);
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+        alert('Invalid demo package amount.');
+        return;
+    }
+
     closeQuickPackModal();
 
-    try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ packName, coins, price })
-      });
-      const data = await res.json();
+    const params = new URLSearchParams({
+        amount: amount.toFixed(2),
+        product: packName,
+        coins: String(coins)
+    });
 
-      if (res.ok && data.checkoutUrl) {
-        if (window.Youpi) {
-          Youpi.pay({
-            checkoutUrl: data.checkoutUrl,
-            order_id: data.orderId,
-            amount: price,
-            name: 'YOUPI Store',
-            description: `${packName}`,
-            handler: async function(paymentResponse) {
-              // Direct instant credit
-              await fetch('/api/verify-payment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  paymentId: paymentResponse.utr || paymentResponse.paymentId || data.paymentId,
-                  orderId: data.orderId,
-                  coins: coins,
-                  packName: packName
-                })
-              });
-              document.getElementById('successBanner').hidden = false;
-              loadWallet();
-            }
-          });
-        } else {
-          window.location.href = data.checkoutUrl;
-        }
-      } else {
-        alert(data.error || 'Failed to initiate checkout.');
-      }
-    } catch (err) {
-      alert('Checkout error: ' + err.message);
-    }
-  }
+    window.location.assign(
+        '/checkout/demo?' + params.toString()
+    );
+}
+
 
   loadWallet();
 </script>

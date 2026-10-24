@@ -1747,65 +1747,25 @@ app.post('/api/youpi-webhook', express.raw({ type: 'application/json' }), (req, 
     }
 
     // --- PURCHASE INITIATION (Using Official Universal YouPI Integration) ---
-    async function startGatewayPurchase() {
-      const btn = document.getElementById('btnInitiateCheckout');
-      const oldHtml = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML = '<span>⏳ Preparing Gateway Session...</span>';
+    
+function startGatewayPurchase() {
+    const amount = Number(currentAmount);
 
-      try {
-        const orderId = `COIN-ORD-${Date.now()}`;
-        btn.setAttribute('data-amount', currentAmount.toFixed(2));
-        btn.setAttribute('data-order-id', orderId);
-
-        // 1. Create order on store backend via YoupiPaymentClient
-        const res = await fetch('/api/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            price: currentAmount,
-            productName: 'YOUPI PG Enterprise Gateway Suite',
-            coins: Math.round(currentAmount)
-          })
-        });
-
-        const data = await res.json();
-        if (!res.ok || !data.checkoutUrl) {
-          alert(data.error || 'Failed to initiate checkout session.');
-          btn.disabled = false;
-          btn.innerHTML = oldHtml;
-          return;
-        }
-
-        // 2. Launch checkout modal using official Youpi.pay() SDK
-        window.Youpi.pay({
-          checkoutUrl: data.checkoutUrl,
-          order_id: data.orderId,
-          amount: currentAmount,
-          currency: 'INR',
-          name: 'YOUPI Store',
-          description: 'YOUPI PG Enterprise Suite Top-Up',
-          successUrl: `/order-success?order_id=${encodeURIComponent(data.orderId)}&amount=${encodeURIComponent(currentAmount)}`,
-          failedUrl: `/order-failed?order_id=${encodeURIComponent(data.orderId)}`,
-          suspiciousUrl: `/order-suspicious?order_id=${encodeURIComponent(data.orderId)}`,
-          expiredUrl: `/order-expired?order_id=${encodeURIComponent(data.orderId)}`,
-          cancelledUrl: `/order-cancelled?order_id=${encodeURIComponent(data.orderId)}`,
-          handler: function(paymentResponse) {
-            btn.disabled = false;
-            btn.innerHTML = oldHtml;
-            showCelebrationModal(data.orderId, paymentResponse.utr || paymentResponse.paymentId || data.paymentId, currentAmount);
-          },
-          onClose: function() {
-            btn.disabled = false;
-            btn.innerHTML = oldHtml;
-          }
-        });
-      } catch (err) {
-        alert('Error launching YOUPI Gateway: ' + err.message);
-        btn.disabled = false;
-        btn.innerHTML = oldHtml;
-      }
+    if (!Number.isFinite(amount) || amount <= 0) {
+        alert('Please enter a valid demo amount.');
+        return;
     }
+
+    const params = new URLSearchParams({
+        amount: amount.toFixed(2),
+        product: 'YOUPI PG Enterprise Gateway Suite'
+    });
+
+    window.location.assign(
+        '/checkout/demo?' + params.toString()
+    );
+}
+
 
     // --- OFFICIAL BROWSER PAYMENT EVENT LISTENERS ---
     window.addEventListener('youpi:payment:success', function(e) {
