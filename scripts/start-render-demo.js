@@ -12,6 +12,20 @@ const storeHtmlPath = path.resolve(
     __dirname,
     '../apps/coin-wallet-store/src/store.html'
 );
+const assetsDir = path.resolve(
+    __dirname,
+    '../apps/coin-wallet-store/public/assets'
+);
+
+const assetMimeTypes = {
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.webp': 'image/webp',
+    '.gif': 'image/gif',
+    '.svg': 'image/svg+xml',
+    '.mp4': 'video/mp4'
+};
 
 const server = http.createServer((req, res) => {
     const url = new URL(
@@ -21,6 +35,50 @@ const server = http.createServer((req, res) => {
 
     const pathname = url.pathname;
     const method = req.method;
+    // Serve public image and video assets
+if (pathname.startsWith('/assets/')) {
+    if (method !== 'GET' && method !== 'HEAD') {
+        res.writeHead(405, { Allow: 'GET, HEAD' });
+        res.end();
+        return;
+    }
+
+    const filename = pathname.slice('/assets/'.length);
+
+    // Allow only simple filenames from the public assets folder.
+    if (!/^[a-zA-Z0-9_-]+\.(png|jpg|jpeg|webp|gif|svg|mp4)$/i.test(filename)) {
+        res.writeHead(404);
+        res.end('Asset not found');
+        return;
+    }
+
+    const filePath = path.join(assetsDir, filename);
+    const extension = path.extname(filename).toLowerCase();
+
+    fs.stat(filePath, (error, stats) => {
+        if (error || !stats.isFile()) {
+            res.writeHead(404);
+            res.end('Asset not found');
+            return;
+        }
+
+        res.writeHead(200, {
+            'Content-Type': assetMimeTypes[extension] || 'application/octet-stream',
+            'Content-Length': stats.size,
+            'Cache-Control': 'public, max-age=3600',
+            'X-Content-Type-Options': 'nosniff'
+        });
+
+        if (method === 'HEAD') {
+            res.end();
+            return;
+        }
+
+        fs.createReadStream(filePath).pipe(res);
+    });
+
+    return;
+}
 
     // Render and UptimeRobot health check
     if (pathname === '/health' && method === 'GET') {
