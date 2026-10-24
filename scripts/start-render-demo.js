@@ -81,6 +81,54 @@ const server = http.createServer((req, res) => {
         return;
     }
 
+    // Safe read-only demo pages
+const previewPages = {
+    '/wallet': 'wallet.html',
+    '/order-success': 'order-success.html',
+    '/order-failed': 'order-failed.html',
+    '/order-suspicious': 'order-suspicious.html',
+    '/order-expired': 'order-expired.html',
+    '/order-cancelled': 'order-cancelled.html'
+};
+
+if (
+    method === 'GET' &&
+    Object.hasOwn(previewPages, pathname)
+) {
+    try {
+        const pagePath = path.resolve(
+            __dirname,
+            '../apps/coin-wallet-store/src',
+            previewPages[pathname]
+        );
+
+        const html = fs.readFileSync(pagePath, 'utf8');
+
+        res.writeHead(200, {
+            'Content-Type': 'text/html; charset=utf-8',
+            'Cache-Control': 'no-store',
+            'X-Content-Type-Options': 'nosniff',
+            'Content-Security-Policy':
+                "default-src 'self'; " +
+                "img-src 'self' data: https:; " +
+                "style-src 'self' 'unsafe-inline'; " +
+                "script-src 'self' 'unsafe-inline'; " +
+                "connect-src 'none'; " +
+                "frame-src 'none'; " +
+                "form-action 'none'; " +
+                "object-src 'none'; " +
+                "base-uri 'none'"
+        });
+
+        res.end(html);
+    } catch (error) {
+        console.error(error);
+        res.writeHead(500);
+        res.end('Unable to load preview page.');
+    }
+
+    return;
+}
     // Payment functionality is deliberately disabled
     res.writeHead(404, {
         'Content-Type': 'application/json',
