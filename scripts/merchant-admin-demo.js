@@ -91,6 +91,12 @@ dialog{border:0;border-radius:16px;padding:24px;width:min(560px,calc(100% - 30px
 <div><label for="end">End date</label><input id="end" type="date"></div>
 <button id="reset" class="secondary">Reset</button></div><p id="filterNote" class="hint" role="status"></p></section>
 <section class="grid2"><div class="panel"><h2>Outcome Distribution</h2><div id="outcomes"></div></div><div class="panel"><h2>Demo Settlement Report</h2><div id="settlements"></div><p class="hint">Illustrative grouping by transaction date; no actual settlement, payout, fee or bank reconciliation.</p></div></section>
+<section class="panel" aria-label="Demo analytics and settlement exports">
+<div class="actions"><div><h2>Demo Analytics &amp; Settlement Summary</h2><span class="hint">Based on the transaction filters above. All amounts are fictional; no bank payouts or fees.</span></div><div class="right"><button id="analyticsCsv">Download daily analytics CSV</button><button id="settlementCsv" class="secondary">Download settlement CSV</button></div></div>
+<div class="refund-summary"><div>Successful transactions: <strong id="analyticsSuccess">0</strong></div><div>Success rate: <strong id="analyticsRate">0%</strong></div><div>Average successful amount: <strong id="analyticsAverage">₹0</strong></div></div>
+<div class="grid2"><div><h2>Daily Net Volume Trend</h2><div id="analyticsTrend"></div></div><div><h2>Daily Fictional Settlement Breakdown</h2><div class="tablewrap"><table><thead><tr><th>Date</th><th>Gross</th><th>Refund</th><th>Net</th></tr></thead><tbody id="analyticsRows"></tbody></table></div></div></div>
+<p class="hint">Refunds are attributed to their original fictional transaction date, not the refund timestamp. Net = successful gross − simulated refunds. These are not actual settlements.</p>
+</section>
 <section class="panel"><div class="actions"><div><h2>Transaction History</h2><span class="hint" id="resultCount"></span></div><div class="right"><button id="csv">Export filtered CSV</button><button id="print">Print demo report</button></div></div>
 <div class="tablewrap"><table><thead><tr><th>ID</th><th>Date</th><th>Customer</th><th>Amount</th><th>Status</th><th>Demo refund</th><th>Details</th></tr></thead><tbody id="rows"></tbody></table></div>
 <div class="pager"><label for="pageSize">Rows</label><select id="pageSize" style="width:auto"><option>5</option><option selected>10</option><option>20</option></select><button id="prev" class="secondary">Previous</button><span id="pageInfo"></span><button id="next" class="secondary">Next</button></div></section>
@@ -177,6 +183,64 @@ function charts(){
  if(!dates.length){b.textContent='No simulated successful transactions in this selection.';return}
  dates.forEach(d=>{const g=groups.get(d);bar(b,d,g.gross-g.refund,max,money(g.gross-g.refund))});
 }
+// Fictional analytics: no network requests, actual payouts, or payment processing.
+function analyticsGroups(){
+ const groups=new Map();
+ for(const t of filtered){
+  if(!groups.has(t.date))groups.set(t.date,{date:t.date,count:0,success:0,gross:0,refund:0,failed:0,pending:0,cancelled:0});
+  const g=groups.get(t.date);g.count++;
+  if(t.status==='SUCCESS'){g.success++;g.gross+=t.amount;g.refund+=t.refund}
+  if(t.status==='FAILED')g.failed++;
+  if(t.status==='PENDING')g.pending++;
+  if(t.status==='CANCELLED')g.cancelled++;
+ }
+ return [...groups.values()].sort((a,b)=>a.date.localeCompare(b.date));
+}
+function renderAnalytics(){
+ const groups=analyticsGroups();
+ const successes=groups.reduce((n,g)=>n+g.success,0);
+ const gross=groups.reduce((n,g)=>n+g.gross,0);
+ el('analyticsSuccess').textContent=String(successes);
+ el('analyticsRate').textContent=filtered.length?(100*successes/filtered.length).toFixed(1)+'%':'0%';
+ el('analyticsAverage').textContent=money(successes?gross/successes:0);
+ const trend=el('analyticsTrend'),body=el('analyticsRows');
+ trend.replaceChildren();body.replaceChildren();
+ const max=Math.max(1,...groups.map(g=>g.gross-g.refund));
+ if(!groups.length){trend.textContent='No fictional transactions match these filters.';}
+ for(const g of groups){
+  const net=g.gross-g.refund;
+  bar(trend,g.date,net,max,money(net));
+  const tr=document.createElement('tr');
+  [g.date,money(g.gross),money(g.refund),money(net)].forEach(v=>cell(tr,v));
+  body.append(tr);
+ }
+ el('analyticsCsv').disabled=!groups.length;
+ el('settlementCsv').disabled=!groups.length;
+}
+function downloadAnalyticsCSV(filename,records){
+ // Reuse existing spreadsheet-formula-safe csvCell and browser-only download.
+ const content='\uFEFF'+records.map(row=>row.map(csvCell).join(',')).join('\r\n');
+ const url=URL.createObjectURL(new Blob([content],{type:'text/csv;charset=utf-8'}));
+ const a=document.createElement('a');a.href=url;a.download=filename;
+ document.body.append(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function exportAnalyticsCSV(){
+ const groups=analyticsGroups();if(!groups.length)return;
+ downloadAnalyticsCSV('youpi-daily-analytics-DEMO.csv',[
+  ['Date','Transactions','Successful','Failed','Pending','Cancelled','Successful Gross INR','Simulated Refund INR','Net Simulated INR','Disclaimer'],
+  ...groups.map(g=>[g.date,g.count,g.success,g.failed,g.pending,g.cancelled,g.gross,g.refund,g.gross-g.refund,'DEMO ONLY - NOT A FINANCIAL RECORD'])
+ ]);
+}
+function exportSettlementCSV(){
+ const groups=analyticsGroups();if(!groups.length)return;
+ const total=groups.reduce((a,g)=>({gross:a.gross+g.gross,refund:a.refund+g.refund}),{gross:0,refund:0});
+ downloadAnalyticsCSV('youpi-settlement-summary-DEMO.csv',[
+  ['Original Transaction Date','Successful Gross INR','Simulated Refund INR','Net Simulated INR','Settlement Status','Disclaimer'],
+  ...groups.map(g=>[g.date,g.gross,g.refund,g.gross-g.refund,'FICTIONAL - NOT SETTLED','DEMO ONLY - NOT A FINANCIAL RECORD']),
+  ['TOTAL',total.gross,total.refund,total.gross-total.refund,'FICTIONAL - NOT SETTLED','DEMO ONLY - NOT A FINANCIAL RECORD']
+ ]);
+}
 function cell(tr,text){const td=document.createElement('td');td.textContent=String(text);tr.append(td);return td}
 function renderTable(){
  const size=Number(el('pageSize').value),pages=Math.max(1,Math.ceil(filtered.length/size));page=Math.min(page,pages);
@@ -192,7 +256,7 @@ function renderTable(){
  el('prev').disabled=page<=1;el('next').disabled=page>=pages;
  el('csv').disabled=!filtered.length;el('print').disabled=!filtered.length;
 }
-function refresh(resetPage=false){if(resetPage)page=1;filtered=filterData();metrics();charts();renderTable()}
+function refresh(resetPage=false){if(resetPage)page=1;filtered=filterData();metrics();charts();renderTable();renderAnalytics()}
 function openDetail(id){
  const t=transactions.find(x=>x.id===id);if(!t)return;selectedId=id;
  const body=el('detailBody');body.replaceChildren();
@@ -280,6 +344,8 @@ el('refundSearch').addEventListener('input',renderRefundHistory);
 el('refundClear').addEventListener('click',()=>{el('refundSearch').value='';renderRefundHistory()});
 el('refundCsv').addEventListener('click',exportRefundCSV);
 el('refundPrint').addEventListener('click',printRefundReport);
+el('analyticsCsv').addEventListener('click',exportAnalyticsCSV);
+el('settlementCsv').addEventListener('click',exportSettlementCSV);
 refresh(true);renderRefundHistory();
 </script></body></html>`;
 }
