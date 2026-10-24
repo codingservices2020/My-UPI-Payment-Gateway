@@ -1,3 +1,4 @@
+import { handleMerchantAdminDemo } from './merchant-admin-demo.js';
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -35,6 +36,10 @@ const server = http.createServer((req, res) => {
 
     const pathname = url.pathname;
     const method = req.method;
+    // Protected, isolated Merchant Admin simulation
+    if (handleMerchantAdminDemo(req, res, pathname)) {
+        return;
+    }
     // Serve public image and video assets
 if (pathname.startsWith('/assets/')) {
     if (method !== 'GET' && method !== 'HEAD') {
