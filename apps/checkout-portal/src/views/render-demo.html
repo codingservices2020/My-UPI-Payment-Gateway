@@ -1,201 +1,371 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YOUPI PG | Demo Checkout</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Inter, Arial, sans-serif;
-            background: #f3f6fb;
-            color: #14213d;
-        }
-
-        .header {
-            background: #101d36;
-            color: white;
-            padding: 20px 8%;
-            font-size: 22px;
-            font-weight: 800;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 50px auto;
-            padding: 20px;
-        }
-
-        .notice {
-            background: #fff3cd;
-            color: #664d03;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            font-weight: 600;
-        }
-
-        .checkout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-        }
-
-        .panel {
-            background: white;
-            padding: 28px;
-            border-radius: 18px;
-            box-shadow: 0 8px 30px #15234110;
-        }
-
-        .amount {
-            font-size: 40px;
-            font-weight: 800;
-            margin: 18px 0;
-        }
-
-        button {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            margin: 12px 0;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .success {
-            background: #147d49;
-            color: white;
-        }
-
-        .failed {
-            background: #d64545;
-            color: white;
-        }
-
-        .cancelled {
-            background: #e9edf3;
-            color: #24324a;
-        }
-
-        .result {
-            margin-top: 18px;
-            padding: 16px;
-            border-radius: 10px;
-            background: #f2f5fa;
-            font-weight: 600;
-        }
-
-        a {
-            color: #2563eb;
-        }
-
-        @media (max-width: 650px) {
-            .checkout {
-                grid-template-columns: 1fr;
-            }
-
-            .container {
-                margin: 15px auto;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YouPI PG | Simulated Checkout</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1f5f9;
+  color: #17243d;
+}
+header {
+  padding: 22px 6%;
+  background: #101d36;
+  color: white;
+  font-size: 22px;
+  font-weight: bold;
+}
+main {
+  max-width: 920px;
+  margin: 36px auto;
+  padding: 16px;
+}
+.notice {
+  background: #fff4d6;
+  color: #805500;
+  border: 1px solid #f4d178;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 22px;
+  line-height: 1.6;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+.card {
+  background: white;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 8px 30px #14213d12;
+}
+h2 { margin-top: 0; }
+.muted { color: #64748b; }
+.amount {
+  font-size: 42px;
+  font-weight: 800;
+  margin: 22px 0;
+}
+.detail {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #e2e8f0;
+  overflow-wrap: anywhere;
+}
+button {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 12px 0;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+.success { background: #15803d; color: white; }
+.failed { background: #dc2626; color: white; }
+.cancelled { background: #e2e8f0; color: #17243d; }
+.secondary { background: #2563eb; color: white; }
+.result {
+  display: none;
+  padding: 18px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  margin-top: 18px;
+  line-height: 1.7;
+}
+.result.visible { display: block; }
+.result strong { font-size: 18px; }
+a { color: #2563eb; }
+.footer {
+  text-align: center;
+  padding: 24px;
+  color: #64748b;
+  font-size: 13px;
+}
+@media (max-width: 680px) {
+  .layout { grid-template-columns: 1fr; }
+  main { margin: 12px auto; }
+  .card { padding: 22px; }
+}
+</style>
 </head>
-
 <body>
-    <header class="header">YOUPI PG — Demo Checkout</header>
+<header>⚡ YouPI PG — Demo Checkout</header>
 
-    <main class="container">
-        <div class="notice">
-            SIMULATION ONLY — No real UPI payment, QR code,
-            bank transfer, or settlement will occur.
-        </div>
+<main>
+  <div class="notice">
+    <strong>SIMULATION ONLY — NO REAL PAYMENT</strong>
+    <div>
+      All transaction IDs, statuses and receipts on this page
+      are fictional test data. No money is transferred.
+      No bank or UPI payment is initiated or verified.
+    </div>
+  </div>
 
-        <div class="checkout">
-            <section class="panel">
-                <h2>Order Summary</h2>
-                <p id="productName">Demo Wallet Coin Package</p>
-                <div class="amount" id="checkoutAmount">₹100.00</div>
-                <p>Merchant: YOUPI Demo Store</p>
-                <p>Mode: Test Transaction</p>
-                <p>No payment details are required.</p>
-            </section>
+  <div class="layout">
+    <section class="card">
+      <h2>Order Summary</h2>
+      <p id="productName">Demo Package</p>
+      <div class="amount" id="checkoutAmount">₹100.00</div>
 
-            <section class="panel">
-                <h2>Simulate Payment</h2>
-                <p>Select a test outcome:</p>
+      <div class="detail">
+        <span>Merchant</span>
+        <strong>YouPI Demo Store</strong>
+      </div>
+      <div class="detail">
+        <span>Mode</span>
+        <strong>Simulation</strong>
+      </div>
+      <div class="detail">
+        <span>Transaction ID</span>
+        <strong id="transactionId">Generating...</strong>
+      </div>
+      <div class="detail">
+        <span>Status</span>
+        <strong id="status">NOT STARTED</strong>
+      </div>
 
-                <button class="success" onclick="simulate('success')">
-                    Simulate Successful Payment
-                </button>
+      <p class="muted">
+        This checkout does not require bank details,
+        UPI credentials or any actual payment.
+      </p>
+    </section>
 
-                <button class="failed" onclick="simulate('failed')">
-                    Simulate Failed Payment
-                </button>
+    <section class="card">
+      <h2>Test Payment Outcomes</h2>
+      <p class="muted">
+        Choose the outcome you want to simulate.
+      </p>
 
-                <button class="cancelled" onclick="simulate('cancelled')">
-                    Simulate Cancelled Payment
-                </button>
+      <button class="success" onclick="simulate('success')">
+        ✓ Simulate Successful Payment
+      </button>
+      <button class="failed" onclick="simulate('failed')">
+        ✕ Simulate Failed Payment
+      </button>
+      <button class="cancelled" onclick="simulate('cancelled')">
+        Simulate Cancelled Payment
+      </button>
 
-                <div id="result" class="result" role="status" aria-live="polite">
-                    Waiting for simulation...
-                </div>
-            </section>
-        </div>
+      <div id="result" class="result" role="status"
+           aria-live="polite"></div>
 
-        <p><a href="/">← Back to Demo Store</a></p>
-    </main>
+      <button id="receiptButton" class="secondary"
+              onclick="downloadReceipt()" hidden>
+        Download Demo Receipt
+      </button>
 
-    <script>
+      <button id="outcomeButton" class="secondary"
+              onclick="viewOutcome()" hidden>
+        View Outcome Page
+      </button>
 
-        const checkoutParams = new URLSearchParams(
-            window.location.search
-        );
+      <button class="cancelled" onclick="newSimulation()">
+        Start New Simulation
+      </button>
+    </section>
+  </div>
 
-        const rawAmount = Number(
-            checkoutParams.get('amount') || 100
-        );
+  <p><a href="/">← Return to Demo Store</a></p>
+</main>
 
-        const amount =
-            Number.isFinite(rawAmount) &&
-                rawAmount > 0 &&
-                rawAmount <= 100000
-                ? rawAmount
-                : 100;
+<div class="footer">
+  YouPI PG Demonstration Environment · No Real Payments
+</div>
 
-        const productName = (
-            checkoutParams.get('product') ||
-            'Demo Wallet Coin Package'
-        ).slice(0, 100);
+<script>
+const params = new URLSearchParams(location.search);
 
-        document.getElementById('checkoutAmount').textContent =
-            new Intl.NumberFormat('en-IN', {
-                style: 'currency',
-                currency: 'INR'
-            }).format(amount);
+const requestedAmount = Number(params.get('amount'));
+const amount = Number.isFinite(requestedAmount) &&
+  requestedAmount > 0 && requestedAmount <= 100000
+  ? Math.round(requestedAmount * 100) / 100
+  : 100;
 
-        document.getElementById('productName').textContent =
-            productName;
+const product = (
+  params.get('product') || 'Demo Wallet Coin Package'
+).slice(0, 100);
 
-        function simulate(outcome) {
-            const messages = {
-                success: 'SUCCESS — Simulated payment completed.',
-                failed: 'FAILED — Simulated payment was declined.',
-                cancelled: 'CANCELLED — Simulated payment was cancelled.'
-            };
+const money = new Intl.NumberFormat('en-IN', {
+  style: 'currency',
+  currency: 'INR'
+});
 
-            document.getElementById('result').textContent =
-                messages[outcome] || 'Unknown simulation result';
-        }
-    </script>
+let transactionId = '';
+let outcome = null;
+let completedAt = null;
+let busy = false;
+
+document.getElementById('productName').textContent = product;
+document.getElementById('checkoutAmount').textContent =
+  money.format(amount);
+
+function generateTransactionId() {
+  if (crypto.randomUUID) {
+    return 'DEMO-' + crypto.randomUUID().slice(0, 18).toUpperCase();
+  }
+  const bytes = new Uint8Array(12);
+  crypto.getRandomValues(bytes);
+  return 'DEMO-' + Array.from(bytes, b =>
+    b.toString(16).padStart(2, '0')
+  ).join('').toUpperCase();
+}
+
+function newSimulation() {
+  if (busy) return;
+
+  transactionId = generateTransactionId();
+  outcome = null;
+  completedAt = null;
+
+  document.getElementById('transactionId').textContent =
+    transactionId;
+  document.getElementById('status').textContent = 'NOT STARTED';
+
+  const result = document.getElementById('result');
+  result.classList.remove('visible');
+  result.textContent = '';
+
+  document.getElementById('receiptButton').hidden = true;
+  document.getElementById('outcomeButton').hidden = true;
+  setOutcomeButtonsDisabled(false);
+}
+
+function setOutcomeButtonsDisabled(disabled) {
+  document.querySelectorAll(
+    'button.success, button.failed, button.cancelled'
+  ).forEach(button => {
+    if (button.hasAttribute('onclick') &&
+        button.getAttribute('onclick').startsWith('simulate(')) {
+      button.disabled = disabled;
+    }
+  });
+}
+
+function simulate(selected) {
+  if (busy || outcome) return;
+  if (!['success', 'failed', 'cancelled'].includes(selected)) return;
+
+  busy = true;
+  setOutcomeButtonsDisabled(true);
+
+  document.getElementById('status').textContent = 'PROCESSING';
+
+  const result = document.getElementById('result');
+  result.classList.add('visible');
+  result.textContent = 'Processing simulated transaction...';
+
+  setTimeout(() => {
+    outcome = selected;
+    completedAt = new Date();
+    busy = false;
+
+    const labels = {
+      success: 'SUCCESS — Simulated payment completed.',
+      failed: 'FAILED — Simulated payment declined.',
+      cancelled: 'CANCELLED — Simulated payment cancelled.'
+    };
+
+    document.getElementById('status').textContent =
+      selected.toUpperCase();
+
+    result.replaceChildren();
+
+    const heading = document.createElement('strong');
+    heading.textContent = labels[selected];
+
+    const details = document.createElement('p');
+    details.textContent =
+      'Demo Transaction: ' + transactionId +
+      ' | Amount: ' + money.format(amount);
+
+    const disclaimer = document.createElement('p');
+    disclaimer.textContent =
+      'TEST RESULT ONLY — Not proof of actual payment.';
+
+    result.append(heading, details, disclaimer);
+
+    document.getElementById('receiptButton').hidden =
+      selected !== 'success';
+    document.getElementById('outcomeButton').hidden = false;
+  }, 1300);
+}
+
+function receiptText() {
+  return [
+    'YOUPI PG — SIMULATED TRANSACTION RECEIPT',
+    '========================================',
+    'DEMO ONLY — NOT PROOF OF PAYMENT',
+    '',
+    'Transaction ID: ' + transactionId,
+    'Product: ' + product,
+    'Amount: ' + money.format(amount),
+    'Currency: INR',
+    'Status: SIMULATED SUCCESS',
+    'Date: ' + completedAt.toISOString(),
+    'Merchant: YouPI Demo Store',
+    '',
+    'No real money was transferred.',
+    'No bank or UPI transaction was performed.',
+    'This receipt has no financial validity.'
+  ].join('\n');
+}
+
+function downloadReceipt() {
+  if (outcome !== 'success' || !completedAt) return;
+
+  const blob = new Blob([receiptText()], {
+    type: 'text/plain;charset=utf-8'
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = transactionId + '-DEMO-RECEIPT.txt';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function viewOutcome() {
+  if (!outcome || !completedAt) return;
+
+  const routes = {
+    success: '/order-success',
+    failed: '/order-failed',
+    cancelled: '/order-cancelled'
+  };
+
+  const query = new URLSearchParams({
+    demo: '1',
+    transactionId,
+    product,
+    amount: amount.toFixed(2),
+    status: outcome,
+    date: completedAt.toISOString()
+  });
+
+  location.assign(routes[outcome] + '?' + query.toString());
+}
+
+newSimulation();
+</script>
 </body>
-
 </html>

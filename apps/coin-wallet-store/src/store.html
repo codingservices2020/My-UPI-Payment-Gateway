@@ -961,6 +961,21 @@
 </head>
 <body>
 
+<div style="
+  background:#fff3cd;
+  color:#805500;
+  padding:13px 20px;
+  text-align:center;
+  font:700 14px Arial,sans-serif;
+  border-bottom:2px solid #f0cc73;
+  line-height:1.6;
+">
+  ⚠️ PUBLIC DEMO — SIMULATION ONLY.
+  No real UPI payment, QR payment instruction,
+  bank transfer or settlement is available.
+  All checkout results are fictional test data.
+</div>
+
   <!-- TOP ANNOUNCEMENT BAR -->
   <div class="top-announcement">
     <span>✨ <strong>YOUPI Gateway</strong> Demo Powered by YOUPI PG</span>
@@ -1026,7 +1041,7 @@
         <div class="product-header-block">
           <h1 class="product-h1">YOUPI PG — Small Scale Self-Hosted UPI Payment Gateway</h1>
           <p style="color:var(--text-muted); font-size:0.92rem; margin-top:0.35rem; font-weight:600;">
-            Direct-to-bank sovereign settlement. Test live checkout with zero intermediary fees.
+            Explore a simulated UPI checkout experience. No real payments are processed in this demo.
           </p>
         </div>
 
@@ -1034,14 +1049,14 @@
         <div class="buy-box-card" id="purchase">
           <div class="pricing-header">
             <div>
-              <span style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Live Demo Checkout Price</span>
+              <span style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Simulated Checkout Amount</span>
               <div class="price-main" id="displayPrice">₹1.00</div>
             </div>
-            <span class="price-badge-demo">1-Tap Live Checkout</span>
+            <span class="price-badge-demo">Interactive Demo Checkout</span>
           </div>
 
           <p class="pricing-note">
-            Test real end-to-end payment gateway execution. Default is <strong>₹1.00</strong> for instant testing, or select/type any custom amount:
+            Explore the checkout flow using simulated transactions. No money will be transferred. Default is <strong>₹1.00</strong> for instant testing, or select/type any custom amount:
           </p>
 
           <!-- Quick Preset Chips -->
@@ -1081,7 +1096,7 @@
                   data-expired-url="/order-expired"
                   data-cancelled-url="/order-cancelled"
                   onclick="startGatewayPurchase()">
-            <span>⚡ Buy Now with YOUPI PG · <span id="btnAmountDisplay">₹1.00</span></span>
+            <span>⚡ Try Demo Checkout with YOUPI PG · <span id="btnAmountDisplay">₹1.00</span></span>
           </button>
 
           <div class="security-guarantee-note">

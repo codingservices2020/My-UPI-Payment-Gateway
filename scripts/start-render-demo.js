@@ -142,11 +142,11 @@ if (pathname.startsWith('/assets/')) {
     // Safe read-only demo pages
 const previewPages = {
     '/wallet': 'wallet.html',
-    '/order-success': 'order-success.html',
-    '/order-failed': 'order-failed.html',
+    '/order-success': 'demo-outcome.html',
+    '/order-failed': 'demo-outcome.html',
     '/order-suspicious': 'order-suspicious.html',
     '/order-expired': 'order-expired.html',
-    '/order-cancelled': 'order-cancelled.html'
+    '/order-cancelled': 'demo-outcome.html'
 };
 
 if (

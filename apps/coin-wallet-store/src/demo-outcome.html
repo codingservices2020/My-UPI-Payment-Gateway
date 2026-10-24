@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YouPI PG | Demo Outcome</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1f5f9;
+  color: #17243d;
+}
+header {
+  padding: 22px 6%;
+  background: #101d36;
+  color: white;
+  font-size: 22px;
+  font-weight: bold;
+}
+.card {
+  max-width: 600px;
+  margin: 55px auto;
+  background: white;
+  border-radius: 20px;
+  padding: 35px;
+  box-shadow: 0 10px 35px #14213d16;
+  text-align: center;
+}
+.symbol { font-size: 60px; }
+h1 { font-size: 28px; }
+.notice {
+  padding: 15px;
+  border-radius: 10px;
+  background: #fff3cd;
+  color: #805500;
+  margin: 22px 0;
+  line-height: 1.6;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  text-align: left;
+  gap: 15px;
+  padding: 14px 0;
+  border-bottom: 1px solid #e2e8f0;
+  overflow-wrap: anywhere;
+}
+.row strong { text-align: right; }
+a {
+  display: inline-block;
+  margin: 18px 5px 0;
+  padding: 13px 18px;
+  border-radius: 9px;
+  background: #2563eb;
+  color: white;
+  text-decoration: none;
+}
+@media (max-width: 650px) {
+  .card { margin: 20px 12px; padding: 22px; }
+}
+</style>
+</head>
+<body>
+<header>⚡ YouPI PG — Demo Result</header>
+
+<main class="card">
+  <div class="symbol" id="symbol">ℹ️</div>
+  <h1 id="heading">Simulation Result</h1>
+  <p id="description"></p>
+
+  <div class="notice">
+    <strong>SIMULATION ONLY</strong>
+    <div>
+      This result is generated from browser-supplied test data.
+      It does not confirm any real payment or transfer.
+    </div>
+  </div>
+
+  <div class="row">
+    <span>Transaction</span>
+    <strong id="transaction">—</strong>
+  </div>
+  <div class="row">
+    <span>Product</span>
+    <strong id="product">—</strong>
+  </div>
+  <div class="row">
+    <span>Amount</span>
+    <strong id="amount">—</strong>
+  </div>
+  <div class="row">
+    <span>Outcome</span>
+    <strong id="status">—</strong>
+  </div>
+  <div class="row">
+    <span>Demo Date</span>
+    <strong id="date">—</strong>
+  </div>
+
+  <a href="/">Return to Store</a>
+  <a href="/wallet">Open Wallet</a>
+  <a href="/checkout/demo">New Simulation</a>
+</main>
+
+<script>
+const params = new URLSearchParams(location.search);
+const status = location.pathname === '/order-success'
+  ? 'success'
+  : location.pathname === '/order-failed'
+  ? 'failed'
+  : location.pathname === '/order-cancelled'
+  ? 'cancelled'
+  : 'unknown';
+
+const outcomes = {
+  success: {
+    symbol: '✓',
+    title: 'Simulated Payment Successful',
+    description: 'The test transaction was marked successful.'
+  },
+  failed: {
+    symbol: '✕',
+    title: 'Simulated Payment Failed',
+    description: 'The test transaction was marked failed.'
+  },
+  cancelled: {
+    symbol: '○',
+    title: 'Simulated Payment Cancelled',
+    description: 'The test transaction was cancelled.'
+  },
+  unknown: {
+    symbol: 'ℹ️',
+    title: 'Simulation Status',
+    description: 'No supported simulation outcome was selected.'
+  }
+};
+
+const info = outcomes[status];
+document.getElementById('symbol').textContent = info.symbol;
+document.getElementById('heading').textContent = info.title;
+document.getElementById('description').textContent =
+  info.description;
+
+const amount = Number(params.get('amount'));
+const safeAmount = Number.isFinite(amount) &&
+  amount > 0 && amount <= 100000 ? amount : null;
+
+document.getElementById('transaction').textContent =
+  (params.get('transactionId') || 'Not supplied').slice(0, 80);
+document.getElementById('product').textContent =
+  (params.get('product') || 'Demo Package').slice(0, 100);
+document.getElementById('amount').textContent =
+  safeAmount === null ? 'Not supplied' :
+  new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR'
+  }).format(safeAmount);
+document.getElementById('status').textContent =
+  status.toUpperCase();
+
+const rawDate = params.get('date');
+const parsedDate = rawDate ? new Date(rawDate) : null;
+document.getElementById('date').textContent =
+  parsedDate && !Number.isNaN(parsedDate.getTime())
+  ? parsedDate.toLocaleString('en-IN')
+  : 'Not supplied';
+</script>
+</body>
+</html>
