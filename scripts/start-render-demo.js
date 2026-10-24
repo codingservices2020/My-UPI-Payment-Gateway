@@ -1,37 +1,100 @@
 import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-// Render automatically provides the PORT environment variable
 const PORT = Number(process.env.PORT || 10000);
 
-const server = http.createServer((req, res) => {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-    // Health check endpoint for Render and UptimeRobot
-    if (req.url === '/health') {
+const storeHtmlPath = path.resolve(
+    __dirname,
+    '../apps/coin-wallet-store/src/store.html'
+);
+
+const server = http.createServer((req, res) => {
+    const url = new URL(
+        req.url,
+        'http://localhost'
+    );
+
+    const pathname = url.pathname;
+    const method = req.method;
+
+    // Render and UptimeRobot health check
+    if (pathname === '/health' && method === 'GET') {
         res.writeHead(200, {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store'
         });
 
         res.end(JSON.stringify({
             status: 'UP',
             service: 'youpi-pg-demo',
+            mode: 'demo-preview',
             timestamp: new Date().toISOString()
         }));
 
         return;
     }
 
-    // Temporary placeholder until full demo is configured
-    res.writeHead(503, {
-        'Content-Type': 'text/plain; charset=utf-8'
+    // Display the existing Demo Store homepage
+    if (
+        (pathname === '/' || pathname === '/store') &&
+        (method === 'GET' || method === 'HEAD')
+    ) {
+        try {
+            const html = fs.readFileSync(
+                storeHtmlPath,
+                'utf8'
+            );
+
+            res.writeHead(200, {
+                'Content-Type': 'text/html; charset=utf-8',
+                'Cache-Control': 'no-store',
+                'X-Content-Type-Options': 'nosniff',
+                'X-Frame-Options': 'SAMEORIGIN',
+                'Content-Security-Policy':
+                    "default-src 'self'; " +
+                    "img-src 'self' data: https:; " +
+                    "style-src 'self' 'unsafe-inline'; " +
+                    "script-src 'self' 'unsafe-inline'; " +
+                    "connect-src 'none'; " +
+                    "frame-src 'none'; " +
+                    "object-src 'none'; " +
+                    "base-uri 'none'; " +
+                    "form-action 'none'"
+            });
+
+            res.end(method === 'HEAD' ? undefined : html);
+        } catch (error) {
+            console.error('Store HTML error:', error);
+
+            res.writeHead(500, {
+                'Content-Type': 'text/plain'
+            });
+
+            res.end('Unable to load Demo Store.');
+        }
+
+        return;
+    }
+
+    // Payment functionality is deliberately disabled
+    res.writeHead(404, {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store'
     });
 
-    res.end(
-        'YouPI-PG demo website is not enabled yet. ' +
-        'Payment functionality is disabled.'
-    );
+    res.end(JSON.stringify({
+        error: 'Not available in demo preview',
+        message: 'Payment functionality is disabled.'
+    }));
 });
 
-// Start server
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`YouPI-PG server running on port ${PORT}`);
+    console.log(
+        `YouPI-PG Demo Store preview running on port ${PORT}`
+    );
 });
